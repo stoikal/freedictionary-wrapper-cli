@@ -6,14 +6,22 @@ const program = new Command();
 
 program
   .argument("<word>", "The word to search for")
-  .action((word) => {
-    handleWord(word)
+  .option("-l, --lang <code>", "Language code (e.g. de, en)", "de")
+  .action((word, options) => {
+    handleWord(word, options.lang)
+      .catch(() => {
+        console.log(pc.red("error"))
+      })
   });
 
 program.parse();
 
-async function handleWord(word: string) {
-  const data = await fetchWord(word)
+async function handleWord(word: string, lang: string) {
+  const data = await fetchWord(word, lang)
+
+  if (!data.entries.length) {
+    return console.log(pc.red("not found"))
+  }
 
   data.entries.forEach((entry, index) => {
     printHeader(word, entry, index + 1)
@@ -29,11 +37,17 @@ async function handleWord(word: string) {
 }
 
 
-async function fetchWord(word: string): Promise<FreeDictionaryResponse> {
-  const BASE_URL = "https://freedictionaryapi.com/api/v1/entries/de";
-  const url = `${BASE_URL}/${word}`;
+async function fetchWord(word: string, lang: string): Promise<FreeDictionaryResponse> {
+  const BASE_URL = "https://freedictionaryapi.com/api/v1/entries";
+  const url = `${BASE_URL}/${lang}/${word}`;
 
   const response = await fetch(url);
+
+  if (!response.ok) {
+    console.log(876)
+    throw new Error(`HTTP ${response.status}`);
+  }
+
   return response.json() as Promise<FreeDictionaryResponse>;
 }
 
