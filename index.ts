@@ -1,3 +1,4 @@
+#!/usr/bin/env bun
 import { Command } from "commander";
 import pc from "picocolors";
 import type { Entry, Form, FreeDictionaryResponse, Options, Sense } from "./type";
@@ -9,7 +10,7 @@ program
   .option("-l, --lang <code>", "Language code (e.g. de, en)", "de")
   .option("-f, --show-forms", "Show forms", false)
   .option("--no-definitions", "Show definitions",)
-  .option("-r, --result <num>", "Number of results", "all")
+  .option("-r, --result <num>", "Number of results", "5")
   .action((word, options: Options) => {
     handleWord(word, options)
       .catch(() => {

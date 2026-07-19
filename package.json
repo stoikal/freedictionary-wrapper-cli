@@ -3,7 +3,7 @@
   "module": "index.ts",
   "type": "module",
   "bin": {
-    "de": "./index.ts"
+    "dict": "./index.ts"
   },
   "engines": {
     "bun": "^1"
