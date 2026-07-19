@@ -5,6 +5,7 @@ import { fetchWord } from "./src/api";
 import { printEntryAntonyms, printEntrySynonyms, printForms, printHeader, printSenses } from "./src/format";
 import { parseResultNum, sliceWithEllipsis } from "./src/limit";
 import { withSpinner } from "./src/spinner";
+import { expandCombined } from "./src/argv";
 import type { Options } from "./type";
 
 async function handleWord(word: string, options: Options) {
@@ -34,4 +35,4 @@ async function handleWord(word: string, options: Options) {
 
 const program = buildProgram(handleWord);
 
-program.parse();
+program.parse(expandCombined(process.argv));
