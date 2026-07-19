@@ -26,7 +26,7 @@ async function handleWord(word: string, options: Options) {
     if (options.showForms) printForms(entry.forms ?? [], limit);
     if (options.showSynonyms) printEntrySynonyms(entry.synonyms ?? [], limit);
     if (options.showAntonyms) printEntryAntonyms(entry.antonyms ?? [], limit);
-    if (options.definitions) printSenses(entry.senses, { limit, showExamples: options.showExamples, showSynonyms: options.showSynonyms, showAntonyms: options.showAntonyms });
+    if (options.definitions) printSenses(entry.senses, { limit, showExamples: options.showExamples, showSynonyms: options.showSynonyms, showAntonyms: options.showAntonyms, showTags: options.tags });
   }
 
   if (truncated) console.log(pc.green("..."));

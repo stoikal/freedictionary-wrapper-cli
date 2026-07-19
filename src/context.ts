@@ -3,4 +3,5 @@ export type PrintContext = {
   showExamples: boolean;
   showSynonyms: boolean;
   showAntonyms: boolean;
+  showTags: boolean;
 };

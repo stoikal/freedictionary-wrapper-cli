@@ -77,7 +77,7 @@ export function printForms(forms: Form[], limit: number) {
 }
 
 function printForm(form: Form, depth: number) {
-  printWrapped(pad(depth) + "- ", form.word, pad(depth).length + 2, (s) => s);
+  printWrapped(pad(depth) + pc.white("- "), form.word, pad(depth).length + 2, (s) => s);
 }
 
 function printWordList(label: string, words: string[], limit: number, depth: number) {
@@ -85,7 +85,7 @@ function printWordList(label: string, words: string[], limit: number, depth: num
   console.log(pad(depth) + pc.dim(`${label}:`));
   const indent = pad(depth).length + 4;
   const { items, truncated } = sliceWithEllipsis(words, limit);
-  for (const w of items) printWrapped(pad(depth) + "  - ", w, indent, (s) => s);
+  for (const w of items) printWrapped(pad(depth) + pc.white("  - "), w, indent, (s) => s);
   if (truncated) console.log(pad(depth) + "  ...");
 }
 
@@ -107,7 +107,15 @@ export function printSenses(senses: Sense[], ctx: PrintContext) {
 }
 
 function printSense(sense: Sense, depth: number, ctx: PrintContext) {
-  printWrapped(pad(depth) + "- ", sense.definition, pad(depth).length + 2, pc.white);
+  const parenGroups = sense.definition.match(/\([^)]+\)/gi) ?? [];
+  const tags = (sense.tags ?? []).filter(t =>
+    !parenGroups.some(p => p.toLowerCase().includes(t.toLowerCase())),
+  );
+  const tagStr = ctx.showTags && tags.length
+    ? pc.dim(`[${tags.join(", ")}]`) + " "
+    : "";
+  const styledDef = sense.definition.split(/\s+/).map(w => pc.white(w)).join(" ");
+  printWrapped(pad(depth) + pc.white("- "), tagStr + styledDef, pad(depth).length + 2, s => s);
 
   if (ctx.showSynonyms) printWordList("synonyms", sense.synonyms ?? [], ctx.limit, depth + 1);
   if (ctx.showAntonyms) printWordList("antonyms", sense.antonyms ?? [], ctx.limit, depth + 1);
