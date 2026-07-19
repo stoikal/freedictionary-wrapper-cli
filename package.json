@@ -4,7 +4,10 @@
   "type": "module",
   "private": true,
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "^1"
+  },
+  "engines": {
+    "bun": "^1"
   },
   "peerDependencies": {
     "typescript": "^5"
