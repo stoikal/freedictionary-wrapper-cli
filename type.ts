@@ -6,7 +6,7 @@ export type Options = {
     showExamples: boolean;
     showSynonyms: boolean;
     showAntonyms: boolean;
-    tags: boolean;
+    showTags: boolean;
 }
 
 export type FreeDictionaryResponse = {

@@ -16,7 +16,7 @@ export function buildProgram(action: Action): Command {
     .option("-x, --show-examples", "Show examples", false)
     .option("-s, --show-synonyms", "Show synonyms", false)
     .option("-a, --show-antonyms", "Show antonyms", false)
-    .option("--no-tags", "Suppress tags")
+    .option("-t, --show-tags", "Show tags", false)
     .action(async (word: string, options: Options) => {
       try {
         await action(word, options);
