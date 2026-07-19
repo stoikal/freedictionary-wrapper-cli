@@ -2,7 +2,7 @@
 import pc from "picocolors";
 import { buildProgram } from "./src/cli";
 import { fetchWord } from "./src/api";
-import { printForms, printHeader, printSenses } from "./src/format";
+import { printEntryAntonyms, printEntrySynonyms, printForms, printHeader, printSenses } from "./src/format";
 import { parseResultNum, sliceWithEllipsis } from "./src/limit";
 import type { Options } from "./type";
 
@@ -21,7 +21,9 @@ async function handleWord(word: string, options: Options) {
     printHeader(word, entry, index + 1);
 
     if (options.showForms) printForms(entry.forms ?? [], limit);
-    if (options.definitions) printSenses(entry.senses, { limit, showExamples: options.showExamples });
+    if (options.showSynonyms) printEntrySynonyms(entry.synonyms ?? [], limit);
+    if (options.showAntonyms) printEntryAntonyms(entry.antonyms ?? [], limit);
+    if (options.definitions) printSenses(entry.senses, { limit, showExamples: options.showExamples, showSynonyms: options.showSynonyms, showAntonyms: options.showAntonyms });
   }
 }
 

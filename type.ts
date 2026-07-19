@@ -4,6 +4,8 @@ export type Options = {
     result: string;
     definitions: boolean;
     showExamples: boolean;
+    showSynonyms: boolean;
+    showAntonyms: boolean;
 }
 
 export type FreeDictionaryResponse = {

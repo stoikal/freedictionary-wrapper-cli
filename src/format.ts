@@ -34,6 +34,22 @@ function printForm(form: Form, depth: number) {
   console.log(pad(depth) + "- " + form.word);
 }
 
+function printWordList(label: string, words: string[], limit: number, depth: number) {
+  if (!words.length) return;
+  console.log(pad(depth) + pc.dim(`${label}:`));
+  const { items, truncated } = sliceWithEllipsis(words, limit);
+  for (const w of items) console.log(pad(depth) + "  - " + w);
+  if (truncated) console.log(pad(depth) + "  ...");
+}
+
+export function printEntrySynonyms(synonyms: string[], limit: number) {
+  printWordList("synonyms", synonyms, limit, 0);
+}
+
+export function printEntryAntonyms(antonyms: string[], limit: number) {
+  printWordList("antonyms", antonyms, limit, 0);
+}
+
 export function printSenses(senses: Sense[], ctx: PrintContext) {
   if (!senses.length) return;
 
@@ -46,11 +62,14 @@ export function printSenses(senses: Sense[], ctx: PrintContext) {
 function printSense(sense: Sense, depth: number, ctx: PrintContext) {
   console.log(pc.white(pad(depth) + "- " + sense.definition));
 
+  if (ctx.showSynonyms) printWordList("synonyms", sense.synonyms ?? [], ctx.limit, depth + 1);
+  if (ctx.showAntonyms) printWordList("antonyms", sense.antonyms ?? [], ctx.limit, depth + 1);
+
   if (ctx.showExamples && sense.examples?.length) {
     console.log(pad(depth) + pc.dim("  examples:"));
     const { items, truncated } = sliceWithEllipsis(sense.examples, ctx.limit);
     for (const example of items) {
-      console.log(pc.dim(pc.italic(pad(depth) + "  \"" + example + "\"")));
+      console.log(pc.dim(pc.italic(pad(depth) + '  "' + example + '"')));
     }
     if (truncated) console.log(pad(depth) + "  ...");
   }
