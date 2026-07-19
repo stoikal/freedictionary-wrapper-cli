@@ -1,4 +1,5 @@
 import pc from "picocolors";
+import stringWidth from "string-width";
 import type { Entry, Form, Sense } from "../type";
 import type { PrintContext } from "./context";
 import { sliceWithEllipsis } from "./limit";
@@ -9,6 +10,51 @@ function pad(depth: number): string {
 
 function pronunciationsLine(entry: Entry): string {
   return entry.pronunciations.map((p) => p.text).join(" ");
+}
+
+function printWrapped(
+  prefix: string,
+  text: string,
+  continuationIndent: number,
+  style: (s: string) => string,
+) {
+  const cols = process.stdout.columns ?? 80;
+  const words = text.trim().split(/\s+/);
+  if (!words.length || !words[0]) { console.log(style(prefix)); return; }
+
+  const firstAvail = cols - stringWidth(prefix);
+  const contAvail = cols - continuationIndent;
+
+  if (stringWidth(text.trim()) <= firstAvail) {
+    console.log(style(prefix + text.trim()));
+    return;
+  }
+
+  const indent = " ".repeat(continuationIndent);
+  const allLines: string[] = [];
+  let lineWords: string[] = [];
+  let isFirst = true;
+  let avail = firstAvail;
+
+  for (const word of words) {
+    const test = lineWords.length ? lineWords.join(" ") + " " + word : word;
+    if (stringWidth(test) <= avail) {
+      lineWords.push(word);
+    } else {
+      allLines.push(lineWords.join(" "));
+      lineWords = [word];
+      avail = contAvail;
+      isFirst = false;
+    }
+  }
+  if (lineWords.length) {
+    allLines.push(lineWords.join(" "));
+  }
+
+  for (let i = 0; i < allLines.length; i++) {
+    const line = (i === 0 ? prefix : indent) + allLines[i];
+    console.log(style(line));
+  }
 }
 
 export function printHeader(word: string, entry: Entry, entryNum: number) {
@@ -31,14 +77,15 @@ export function printForms(forms: Form[], limit: number) {
 }
 
 function printForm(form: Form, depth: number) {
-  console.log(pad(depth) + "- " + form.word);
+  printWrapped(pad(depth) + "- ", form.word, pad(depth).length + 2, (s) => s);
 }
 
 function printWordList(label: string, words: string[], limit: number, depth: number) {
   if (!words.length) return;
   console.log(pad(depth) + pc.dim(`${label}:`));
+  const indent = pad(depth).length + 4;
   const { items, truncated } = sliceWithEllipsis(words, limit);
-  for (const w of items) console.log(pad(depth) + "  - " + w);
+  for (const w of items) printWrapped(pad(depth) + "  - ", w, indent, (s) => s);
   if (truncated) console.log(pad(depth) + "  ...");
 }
 
@@ -60,16 +107,17 @@ export function printSenses(senses: Sense[], ctx: PrintContext) {
 }
 
 function printSense(sense: Sense, depth: number, ctx: PrintContext) {
-  console.log(pc.white(pad(depth) + "- " + sense.definition));
+  printWrapped(pad(depth) + "- ", sense.definition, pad(depth).length + 2, pc.white);
 
   if (ctx.showSynonyms) printWordList("synonyms", sense.synonyms ?? [], ctx.limit, depth + 1);
   if (ctx.showAntonyms) printWordList("antonyms", sense.antonyms ?? [], ctx.limit, depth + 1);
 
   if (ctx.showExamples && sense.examples?.length) {
     console.log(pad(depth) + pc.dim("  examples:"));
+    const exIndent = pad(depth).length + 4;
     const { items, truncated } = sliceWithEllipsis(sense.examples, ctx.limit);
     for (const example of items) {
-      console.log(pc.dim(pc.italic(pad(depth) + '  "' + example + '"')));
+      printWrapped(pad(depth) + "  ", `"${example}"`, exIndent, (s) => pc.dim(pc.italic(s)));
     }
     if (truncated) console.log(pad(depth) + "  ...");
   }
