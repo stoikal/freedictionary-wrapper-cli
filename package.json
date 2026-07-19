@@ -2,12 +2,17 @@
   "name": "freedictionary-wrapper-cli",
   "module": "index.ts",
   "type": "module",
-  "private": true,
-  "devDependencies": {
-    "@types/bun": "^1"
+  "bin": {
+    "de": "./index.ts"
   },
   "engines": {
     "bun": "^1"
+  },
+  "dependencies": {
+    "commander": "^15.0.0"
+  },
+  "devDependencies": {
+    "@types/bun": "^1"
   },
   "peerDependencies": {
     "typescript": "^5"
