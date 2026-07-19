@@ -1,5 +1,9 @@
 # freedictionary-wrapper-cli
 
+CLI Wrapper for FreeDictionaryAPI.com
+
+FreeDictionaryAPI.com is a free dictionary API that provides access to structured data from the English Wiktionary.
+
 To install dependencies:
 
 ```bash
