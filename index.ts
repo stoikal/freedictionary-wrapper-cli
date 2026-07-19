@@ -1,14 +1,17 @@
 import { Command } from "commander";
 import pc from "picocolors";
-import type { Entry, Form, FreeDictionaryResponse, Sense } from "./type";
+import type { Entry, Form, FreeDictionaryResponse, Options, Sense } from "./type";
 
 const program = new Command();
 
 program
   .argument("<word>", "The word to search for")
   .option("-l, --lang <code>", "Language code (e.g. de, en)", "de")
-  .action((word, options) => {
-    handleWord(word, options.lang)
+  .option("-f, --show-forms", "Show forms", false)
+  .option("--no-definitions", "Show definitions",)
+  .option("-r, --result <num>", "Number of results", "all")
+  .action((word, options: Options) => {
+    handleWord(word, options)
       .catch(() => {
         console.log(pc.red("error"))
       })
@@ -16,23 +19,38 @@ program
 
 program.parse();
 
-async function handleWord(word: string, lang: string) {
-  const data = await fetchWord(word, lang)
+async function handleWord(word: string, options: Options) {
+  const data = await fetchWord(word, options.lang);
 
   if (!data.entries.length) {
     return console.log(pc.red("not found"))
   }
 
-  data.entries.forEach((entry, index) => {
-    printHeader(word, entry, index + 1)
+  const limit = parseResultNum(options.result);
+  const results = data.entries.slice(0, limit);
 
-    if (entry.forms && entry.forms.length > 0) {
+  results.forEach((entry, index) => {
+    printHeader(word, entry, index + 1);
+
+    if (options.showForms && entry.forms && entry.forms.length > 0) {
       console.log(pc.dim("   forms:"))
-      entry.forms.forEach(form => printForm(form));
+      const forms = entry.forms.slice(0, limit);
+      forms.forEach(form => printForm(form));
+
+      if (entry.forms.length > forms.length) {
+        console.log("   ...")
+      }
     }
 
-    console.log(pc.dim("   definitions:"))
-    entry.senses.forEach(sense => printDefinition(sense));
+    if (options.definitions) {
+      console.log(pc.dim("   definitions:"))
+      const senses = entry.senses.slice(0, limit);
+      senses.forEach(sense => printDefinition(sense, 0, limit));
+
+      if (entry.senses.length > senses.length) {
+        console.log("   ...")
+      }
+    }
   })
 }
 
@@ -44,7 +62,6 @@ async function fetchWord(word: string, lang: string): Promise<FreeDictionaryResp
   const response = await fetch(url);
 
   if (!response.ok) {
-    console.log(876)
     throw new Error(`HTTP ${response.status}`);
   }
 
@@ -70,16 +87,26 @@ function printHeader(word: string, entry: Entry, entryNum: number) {
   console.log(header);
 }
 
-function printDefinition(sense: Sense, depth: number = 0) {
+function printDefinition(sense: Sense, depth: number = 0, limit: number) {
   const pad = 3 + depth * 2;
   console.log("".padStart(pad) + "- " + sense.definition)
 
-  sense.subsenses?.forEach((subsense) => {
-    printDefinition(subsense, depth + 1)
+  const subsenses = sense.subsenses?.slice(0, limit);
+  subsenses?.forEach((subsense) => {
+    printDefinition(subsense, depth + 1, limit)
   })
+
+  if ((sense.subsenses?.length || 0) > (subsenses?.length || 0)) {
+    console.log("".padStart(pad) + "  ...")
+  }
 }
 
 function printForm(form: Form, depth: number = 0) {
   const pad = 3 + depth * 2;
   console.log("".padStart(pad) + "- " + form.word)
+}
+
+function parseResultNum(resultArg: string): number {
+  if (resultArg === "all") return Infinity
+  return parseInt(resultArg) || 0
 }

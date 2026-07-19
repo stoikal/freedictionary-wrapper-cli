@@ -1,3 +1,10 @@
+export type Options = {
+    lang: string;
+    showForms: boolean;
+    result: string;
+    definitions: boolean;
+}
+
 export type FreeDictionaryResponse = {
     word: string;
     entries: Entry[];
