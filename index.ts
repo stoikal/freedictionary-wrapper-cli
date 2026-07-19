@@ -11,10 +11,11 @@ program
   .option("-f, --show-forms", "Show forms", false)
   .option("--no-definitions", "Show definitions",)
   .option("-r, --result <num>", "Number of results", "5")
+  .option("-x, --show-examples", "Show examples", false)
   .action((word, options: Options) => {
     handleWord(word, options)
-      .catch(() => {
-        console.log(pc.red("error"))
+      .catch((e) => {
+        console.log(pc.red(e))
       })
   });
 
@@ -46,7 +47,7 @@ async function handleWord(word: string, options: Options) {
     if (options.definitions) {
       console.log(pc.dim("   definitions:"))
       const senses = entry.senses.slice(0, limit);
-      senses.forEach(sense => printDefinition(sense, 0, limit));
+      senses.forEach(sense => printDefinition(sense, 0, limit, options.showExamples));
 
       if (entry.senses.length > senses.length) {
         console.log("   ...")
@@ -87,9 +88,17 @@ function printHeader(word: string, entry: Entry, entryNum: number) {
   console.log(header);
 }
 
-function printDefinition(sense: Sense, depth: number = 0, limit: number) {
+function printDefinition(sense: Sense, depth: number = 0, limit: number, showExamples: boolean = false) {
   const pad = 3 + depth * 2;
-  console.log("".padStart(pad) + "- " + sense.definition)
+  console.log(pc.white(" ".repeat(pad) + "- " + sense.definition))
+
+  if (showExamples && sense.examples && sense.examples.length) {
+    console.log(" ".repeat(pad) + pc.dim("  examples:"))
+    const examples = sense.examples.slice(0, limit);
+    examples.forEach((example) => {
+      console.log(pc.dim(pc.italic(" ".repeat(pad) + "  \"" + example + "\"")))
+    })
+  }
 
   const subsenses = sense.subsenses?.slice(0, limit);
   subsenses?.forEach((subsense) => {
@@ -97,13 +106,13 @@ function printDefinition(sense: Sense, depth: number = 0, limit: number) {
   })
 
   if ((sense.subsenses?.length || 0) > (subsenses?.length || 0)) {
-    console.log("".padStart(pad) + "  ...")
+    console.log(" ".repeat(pad) + "  ...")
   }
 }
 
 function printForm(form: Form, depth: number = 0) {
   const pad = 3 + depth * 2;
-  console.log("".padStart(pad) + "- " + form.word)
+  console.log(" ".repeat(pad) + "- " + form.word)
 }
 
 function parseResultNum(resultArg: string): number {

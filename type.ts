@@ -3,6 +3,7 @@ export type Options = {
     showForms: boolean;
     result: string;
     definitions: boolean;
+    showExamples: boolean;
 }
 
 export type FreeDictionaryResponse = {
