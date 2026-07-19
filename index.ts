@@ -4,10 +4,11 @@ import { buildProgram } from "./src/cli";
 import { fetchWord } from "./src/api";
 import { printEntryAntonyms, printEntrySynonyms, printForms, printHeader, printSenses } from "./src/format";
 import { parseResultNum, sliceWithEllipsis } from "./src/limit";
+import { withSpinner } from "./src/spinner";
 import type { Options } from "./type";
 
 async function handleWord(word: string, options: Options) {
-  const data = await fetchWord(word, options.lang);
+  const data = await withSpinner(`fetching "${word}"...`, () => fetchWord(word, options.lang));
 
   if (!data.entries.length) {
     console.log(pc.red("not found"));
