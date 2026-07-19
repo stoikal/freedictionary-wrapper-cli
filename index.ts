@@ -78,12 +78,11 @@ function getPronounciations(entry: Entry): string | null {
 function printHeader(word: string, entry: Entry, entryNum: number) {
   let header = pc.green(`${entryNum}. ${word}`)
 
+  if (entry.partOfSpeech) header += pc.yellow(` (${entry.partOfSpeech})`);
   const pronounciations = getPronounciations(entry);
   if (pronounciations) header += pc.dim(` ${pronounciations}`);
 
-  if (entry.partOfSpeech) header += pc.yellow(` (${entry.partOfSpeech})`);
 
-  header += ":";
 
   console.log(header);
 }
