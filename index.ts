@@ -32,4 +32,6 @@ async function handleWord(word: string, options: Options) {
   if (truncated) console.log(pc.green("..."));
 }
 
-buildProgram(handleWord).parse();
+const program = buildProgram(handleWord);
+
+program.parse();
