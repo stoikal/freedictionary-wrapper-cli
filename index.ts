@@ -1,5 +1,6 @@
 import { Command } from "commander";
-import type { Entry, FreeDictionaryResponse, Sense } from "./type";
+import pc from "picocolors";
+import type { Entry, Form, FreeDictionaryResponse, Sense } from "./type";
 
 const program = new Command();
 
@@ -17,9 +18,13 @@ async function handleWord(word: string) {
   data.entries.forEach((entry, index) => {
     printHeader(word, entry, index + 1)
 
-    entry.senses.forEach((sense) => {
-      printSense(sense)
-    })
+    if (entry.forms && entry.forms.length > 0) {
+      console.log(pc.dim("   forms:"))
+      entry.forms.forEach(form => printForm(form));
+    }
+
+    console.log(pc.dim("   definitions:"))
+    entry.senses.forEach(sense => printDefinition(sense));
   })
 }
 
@@ -32,32 +37,35 @@ async function fetchWord(word: string): Promise<FreeDictionaryResponse> {
   return response.json() as Promise<FreeDictionaryResponse>;
 }
 
-function getIpa(entry: Entry): string | null {
-  const found = entry.pronunciations?.find((item) => item.type === "ipa");
-
-  if (!found) return null;
-
-  return found.text;
+function getPronounciations(entry: Entry): string | null {
+  return entry.pronunciations
+    .map((item) => item.text)
+    .join(" ")
 }
 
 function printHeader(word: string, entry: Entry, entryNum: number) {
-  const ipa = getIpa(entry);
+  let header = pc.green(`${entryNum}. ${word}`)
 
-  let header = `${entryNum}. ${word}`
+  const pronounciations = getPronounciations(entry);
+  if (pronounciations) header += pc.dim(` ${pronounciations}`);
 
-  if (ipa) {
-    header += ` ${ipa}`
-  }
-
-  if (entry.partOfSpeech) {
-    header += ` (${entry.partOfSpeech})`
-  }
+  if (entry.partOfSpeech) header += pc.yellow(` (${entry.partOfSpeech})`);
 
   header += ":";
 
   console.log(header);
 }
 
-function printSense(sense: Sense) {
-  console.log("   - " + sense.definition)
+function printDefinition(sense: Sense, depth: number = 0) {
+  const pad = 3 + depth * 2;
+  console.log("".padStart(pad) + "- " + sense.definition)
+
+  sense.subsenses?.forEach((subsense) => {
+    printDefinition(subsense, depth + 1)
+  })
+}
+
+function printForm(form: Form, depth: number = 0) {
+  const pad = 3 + depth * 2;
+  console.log("".padStart(pad) + "- " + form.word)
 }

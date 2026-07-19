@@ -33,7 +33,7 @@ type Pronunciation = {
     tags: string[];
 }
 
-type Form = {
+export type Form = {
     word: string;
     tags: string[];
 }
